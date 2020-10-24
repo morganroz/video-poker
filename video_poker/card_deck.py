@@ -23,7 +23,6 @@ class Suits(Enum):
 class CardDeck(object):
     NUM_CARDS = 52
     NUM_PER_SUIT = 13
-    VALID_POSITION = {"top", "random", "bottom"}
 
     CARD = collections.namedtuple("card", "suit num")
 
@@ -34,13 +33,17 @@ class CardDeck(object):
 
     def reset_deck(self):
         self._deck = list(range(1, self.NUM_CARDS + 1))
+        self.shuffle()
 
     def peek_deck(self):
         """
         Get the existing deck.
         :return [CARD]:
         """
-        return self._deck
+        all_cards = []
+        for card_num in self._deck:
+            all_cards.append(self._get_card_from_num(card_num))
+        return all_cards
 
     def shuffle(self):
         """
@@ -48,7 +51,7 @@ class CardDeck(object):
         :return:
         """
         random.shuffle(self._deck)
-        self._LOGGER.info("Deck is now shuffled. You have {} cards.".format(len(self._deck)))
+        self._LOGGER.info("Deck is shuffled. You have {} cards.".format(len(self._deck)))
 
     def draw(self):
         """
@@ -73,6 +76,20 @@ class CardDeck(object):
             raise RuntimeError("That card does not exist in your deck.")
         self._deck.remove(card_num)
 
+    def replace_card(self, card):
+        """
+        Replace a card to the deck at a random position.
+
+        :param Card card:
+        :return:
+        """
+        # translate card back into the number code
+        card_num = self._convert_card_to_num(card)
+        if card_num in self._deck:
+            raise RuntimeError("That card already exists in your deck. You can only replace cards that have been"
+                               " previously drawn from this deck.")
+        self._deck.insert(random.randint(0, len(self._deck)), card_num)
+
     @classmethod
     def _get_card_from_num(cls, card_num):
         """
@@ -89,6 +106,7 @@ class CardDeck(object):
         except ValueError:
             print("{} - {} - {}".format(card_num, card_code, suit))
 
-    def _convert_card_to_num(self, card):
-        card_num = (Suits[card.suit.name].value + (card.num / self.NUM_PER_SUIT)) * self.NUM_PER_SUIT
+    @classmethod
+    def _convert_card_to_num(cls, card):
+        card_num = (Suits[card.suit.name].value + (card.num / cls.NUM_PER_SUIT)) * cls.NUM_PER_SUIT
         return int(card_num)
