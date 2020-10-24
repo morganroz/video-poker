@@ -53,6 +53,15 @@ class TestCardDeck(unittest.TestCase):
         with self.assertRaises(RuntimeError):
             my_deck.remove_card(card)
 
+    def test_replace_card(self):
+        """
+        Test that a card is replaced in the deck after removed.
+        """
+        my_deck = CardDeck()
+        card = CardDeck.CARD(Suits(0), 10)
+        my_deck.remove_card(card)
+        my_deck.replace_card(card)
+        self.assertIn(card, my_deck.peek_deck())
 
 if __name__ == '__main__':
     logger.setLevel(logging.DEBUG)
